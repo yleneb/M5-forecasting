@@ -1,0 +1,36 @@
+5. move on to data munging & preparation for ML
+6. feature importance
+7. modelling
+8. feature engineering
+9. modelling
+10.ensembling
+11.submission
+12.presentation + write up
+
+total sales
+monthly sales per state
+monthly sales per category
+monthly sales per store
+monthly sales per department per state
+
+total sales with smoothing fit
+seasonality - how do day of week & month of
+  year differ from smoothing fit
+sales per state + smoothing
+relative sales weekday per state
+relative sales monthly per state
+relative sales in category for weekday per state
+relative sales in category for monthly per state
+
+% days with events
+% types of events
+calendar of snap dates
+distribution of prices per state per category per department
+distribution of prices by category & department, yearly mean
+
+sales per category during special events
+relative sales comparing event/non-event
+relative sales of category by event type
+^ above but for state instead of category
+
+^ above but for snap days 

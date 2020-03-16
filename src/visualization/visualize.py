@@ -15,6 +15,9 @@ class SalesVisualizations:
     
     def __init__(self):
         self.df = pd.read_pickle(PROCESSED_DATA_PATH / 'aggregated_dataset.pickle')
+        self.start_date = '2011-01-29'
+        self.end_date = '2016-04-24'
+        self.df = self.df[self.df.index.get_level_values('date')<=self.end_date]
 
     def sales_by_store_and_state(self):
         
@@ -37,7 +40,7 @@ class SalesVisualizations:
         # total aggregated sales
         to_plot = \
         (self.df
-        .loc[:, 'sales']
+        .loc[:, 'demand']
         .sum(axis=1) # sum across departments
         .groupby('date')
         .sum() # sum across stores
@@ -71,7 +74,7 @@ class SalesVisualizations:
         # compare sales across states and stores
         store_sales = \
         (self.df
-        .loc[:, 'sales']
+        .loc[:, 'demand']
         .sum(axis=1) # sum across departments
         .droplevel(['year','month','weekday'])
         .unstack(['state_id','store_id']) # no missing values
@@ -120,6 +123,7 @@ class SalesVisualizations:
 
         fig.update_layout(layout)
         fig.update_yaxes(rangemode='tozero')
+        fig.update_xaxes(range=[self.start_date, self.end_date])
         return fig
 
     def sales_per_category(self):
@@ -139,7 +143,7 @@ class SalesVisualizations:
         # top row sales per category
         cat_sales = \
         (self.df
-        ['sales']
+        ['demand']
         .groupby(level=0, axis=1) # group the categories
         .sum()
         .groupby(level='date')
@@ -159,7 +163,7 @@ class SalesVisualizations:
         # sales per department (3 columns)
         dept_sales = \
         (self.df
-        ['sales']
+        ['demand']
         .groupby(level='date')
         .sum()
         .resample('M')
@@ -186,13 +190,14 @@ class SalesVisualizations:
         fig.update_layout(layout)
         fig.update_yaxes(rangemode='tozero')
         fig.for_each_xaxis(lambda x: x.update(matches='x2') if x.anchor != 'y' else x)
+        fig.update_xaxes(range=[self.start_date, self.end_date])
         return fig
 
     def sales_per_department_and_store(self):
         
         store_dept_sales = \
         (self.df
-        ['sales']
+        ['demand']
         .droplevel(['year','month','weekday','state_id'])
         .unstack('store_id')
         .reorder_levels([2,0,1], axis='columns')
@@ -237,4 +242,5 @@ class SalesVisualizations:
         fig.update_xaxes(matches='x')
         fig.update_yaxes(rangemode='tozero')
         fig.for_each_xaxis(lambda x: x.update(showticklabels=True, tickangle=300) if x.anchor in [f'y{i}' for i in range(21,31)] else x)
+        fig.update_xaxes(range=[self.start_date, self.end_date])
         return fig

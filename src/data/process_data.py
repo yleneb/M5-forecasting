@@ -5,6 +5,7 @@ import pathlib
 ROOT = pathlib.Path().absolute()
 RAW_DATA_PATH = ROOT / 'data' / 'raw'
 PROCESSED_DATA_PATH = ROOT / 'data' / 'processed'
+INTERIM_DATA_PATH = ROOT / 'data' / 'interim'
 
 DAYS_PRED = 28
 
@@ -82,7 +83,7 @@ def make_processed_calendar_dataset(verbose=True):
               f"to {np.round(ending_memory_usage,3)} Mb ({np.round(reduction,1)}% reduction)")
 
     # save to feather
-    df.to_feather(PROCESSED_DATA_PATH / 'calendar_processed.feather')
+    df.to_feather(INTERIM_DATA_PATH / 'calendar_reduced.feather')
 
 def make_processed_sale_price_dataset(verbose=True):
     # really I want to convert sell_price to pence then make an int16
@@ -120,12 +121,12 @@ def make_processed_sale_price_dataset(verbose=True):
         print(f"Memory usage decreased from {np.round(starting_memory_usage,3)} Mb "
               f"to {np.round(ending_memory_usage,3)} Mb ({np.round(reduction,1)}% reduction)")
         
-    df.to_feather(PROCESSED_DATA_PATH / 'sell_prices_processed.feather')
+    df.to_feather(INTERIM_DATA_PATH / 'sell_prices_reduced.feather')
     
 def make_processed_sales_dataset(verbose=True, sample_submission=False):
     
     file_name_load = 'sales_train_validation' if not sample_submission else 'sample_submission'
-    file_name_save = 'sales_train_validation_processed' if not sample_submission else 'submission'
+    file_name_save = 'sales_train_validation_reduced' if not sample_submission else 'submission'
     
     categorical_variables = ['dept_id','cat_id', 'store_id','state_id']
     string_variables = ['item_id','id']
@@ -156,17 +157,17 @@ def make_processed_sales_dataset(verbose=True, sample_submission=False):
         print(f"Memory usage decreased from {np.round(starting_memory_usage,3)} Mb "
               f"to {np.round(ending_memory_usage,3)} Mb ({np.round(reduction,1)}% reduction)")
 
-    df.to_feather(PROCESSED_DATA_PATH / f'{file_name_save}.feather')
+    df.to_feather(INTERIM_DATA_PATH / f'{file_name_save}.feather')
 
 def make_melted_sales_dataset():
     """Manipulate the sales and submission data to return a df with:
     One row per day of sales at each store for each item"""
     sales_train_val = \
-    (pd.read_feather(PROCESSED_DATA_PATH / 'sales_train_validation_processed.feather')
+    (pd.read_feather(INTERIM_DATA_PATH / 'sales_train_validation_reduced.feather')
     .astype({'id':'string','item_id':'string'}))
 
     submission = \
-    (pd.read_feather(PROCESSED_DATA_PATH / 'submission.feather')
+    (pd.read_feather(INTERIM_DATA_PATH / 'submission.feather')
     .astype({'id':'string', 'item_id':'string'}))
 
     # get product information table
@@ -204,11 +205,11 @@ def make_melted_sales_dataset():
             'id':'category', 'item_id':'category'})
     .pipe(reduce_memory_usage))
 
-    sales_train_val.to_parquet(PROCESSED_DATA_PATH / 'melted_sales.parquet')
+    sales_train_val.to_parquet(INTERIM_DATA_PATH / 'melted_sales.parquet')
 
 def make_combined_dataset(verbose=False):
     verbose=True
-    cal_df = pd.read_feather(PROCESSED_DATA_PATH / 'calendar_processed.feather').astype({'d':'category'})
+    cal_df = pd.read_feather(INTERIM_DATA_PATH / 'calendar_reduced.feather').astype({'d':'category'})
 
     # create boolean columns, did this days' sales happen on an event / event type
     event_types = (
@@ -230,7 +231,7 @@ def make_combined_dataset(verbose=False):
     if verbose: print('cal_df complete')
         
     # join calendar to sales data
-    df = pd.read_parquet(PROCESSED_DATA_PATH / 'melted_sales.parquet')
+    df = pd.read_parquet(INTERIM_DATA_PATH / 'melted_sales.parquet')
 
     df = df.join(cal_df.set_index('d'), how='left', on='d').reset_index(drop=True)
     del cal_df
@@ -247,7 +248,7 @@ def make_combined_dataset(verbose=False):
 
     # read in the item prices
     price_df = pd.read_feather(
-        PROCESSED_DATA_PATH / 'sell_prices_processed.feather',
+        INTERIM_DATA_PATH / 'sell_prices_reduced.feather',
         columns=['store_id','item_id','wm_yr_wk','sell_price_cent'])
 
     # join in the item prices
@@ -270,7 +271,7 @@ def make_combined_dataset(verbose=False):
     if verbose: print('dataframe complete')
 
     # save to feather
-    df.to_parquet(PROCESSED_DATA_PATH / 'combined_dataset.parquet')
+    df.to_parquet(INTERIM_DATA_PATH / 'combined_dataset.parquet')
     if verbose:
         print('dataset saved')
         print(df.shape)
@@ -279,7 +280,7 @@ def make_combined_dataset(verbose=False):
 def make_aggregated_dataset():
     # read in the combined dataset
     df = \
-    (pd.read_parquet(PROCESSED_DATA_PATH / 'combined_dataset.parquet')
+    (pd.read_parquet(INTERIM_DATA_PATH / 'combined_dataset.parquet')
     .astype({c:'category' for c in ['wday','month','year']}))
 
     # how will the columns be aggregated

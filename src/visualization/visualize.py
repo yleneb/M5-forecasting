@@ -9,6 +9,7 @@ from plotly.subplots import make_subplots
 
 ROOT = pathlib.Path().absolute().parent
 RAW_DATA_PATH = ROOT / 'data' / 'raw'
+INTERIM_DATA_PATH = ROOT / 'data' / 'interim'
 PROCESSED_DATA_PATH = ROOT / 'data' / 'processed'
 
 class SalesVisualizations:

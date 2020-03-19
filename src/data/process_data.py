@@ -22,8 +22,8 @@ def reduce_memory_usage(df, verbose=False):
     for col in df.columns:
         col_type = df[col].dtypes
 
-        # Downsample numeric dtypes - no need to reduce columns of type int8
-        if col_type in [np.int16, np.int32, np.int64, np.float16, np.float32, np.float64]:
+        # Downsample numeric dtypes
+        if col_type in [np.int8, np.int16, np.int32, np.int64, np.float16, np.float32, np.float64]:
             c_min, c_max = df[col].agg(['min','max'])
 
             # rare case of boolean column

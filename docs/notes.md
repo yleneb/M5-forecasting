@@ -42,3 +42,34 @@ The pdf guide has a collection of benchmarks, both statistical and ML based whic
 - Submit
 - Repeat a few times
 - Write up work and tidy the plots
+
+# Work done
+
+- Data loaded
+- Processed
+- Initial simple linear model
+- Feature Engineering from kaggle
+- Initial Lightgbm Model
+
+# Successes
+
+- Installed CUDA CUDnn
+- Installed Tensorflow-gpu
+- Installed LightGBM-gpu (with great difficulty)
+- Worked in a tidy directory & environment
+- Well documented progress in github
+- Moving from notebooks to scripts
+- Better understanding of pathlib, os, zipfile
+- (kaggle) Found reduce_memory_usage function and made improvements 
+- More experience with regex for extraction
+- Better knowledge of data types (eg np.uint8)
+- More familiarity with pandas io and file types
+- Aggregated dataset for more familiar plotting
+- (kaggle) Learnt some sensible demand and price features
+- Applying a function to df.groupby groups in parallel
+- Use of tqdm to create progress bars
+- used itertools.product in place of a nested loop
+- First experiments with dask
+    - managed to perform feature engineering on a sample but got stuck when scaling to the full dataset
+- (kaggle) found a CustomTimeSeriesSplitter and plotting function
+- (kaggle) First experiment with LightGBM + working with gpu

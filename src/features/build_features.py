@@ -8,6 +8,7 @@ from distributed import Client
 from joblib import Parallel, delayed
 import multiprocessing
 from tqdm import tqdm
+import itertools
 
 ROOT = pathlib.Path().absolute()
 RAW_DATA_PATH = ROOT / 'data' / 'raw'
@@ -25,7 +26,7 @@ def _demand_features(group):
     demand = group['demand']
     # what was the demand x days ago
     for diff in [0, 1, 2]:
-        shift = diff#DAYS_PRED + diff
+        shift = DAYS_PRED + diff
         d[f"shift_t{shift}"] = demand.transform(
             lambda x: x.shift(shift))
 
@@ -138,9 +139,8 @@ def _add_features(group):
     # passthrough all other features
     return group.join(new_features)
    
-
 def applyParallel(dfGrouped, func):
-    retLst = Parallel(n_jobs=multiprocessing.cpu_count())(delayed(func)(group) for name, group in tqdm(dfGrouped))
+    retLst = Parallel(n_jobs=multiprocessing.cpu_count()-2)(delayed(func)(group) for name, group in dfGrouped)
     return pd.concat(retLst)
 
 def train_and_validation(df, dept, store):
@@ -171,29 +171,31 @@ if __name__=='__main__':
     stores = ['CA_1','CA_2','CA_3','CA_4','TX_1','TX_2','TX_3','WI_1','WI_2','WI_3']
 
     # on;y want to read in data once
+    print('Reading combined dataset')
     df = pd.read_parquet(INTERIM_DATA_PATH / 'combined_dataset.parquet')
 
     # feature engineering on each chunck and save as parquet
-    for dept in depts:
-        for store in stores:
-            # print(dept, '|', store)
-            train_and_validation(df, dept, store)
+    print('Processing data in chunks')
+    for dept, store in tqdm(list(itertools.product(depts, stores))):
+        train_and_validation(df, dept, store)
             
     del df
     
     # get a list of all the file paths
+    print('Loading chunks in parallel')
     files = os.listdir(PROCESSED_DATA_PATH / 'train_validation')  
     files = [PROCESSED_DATA_PATH / 'train_validation' / x for x in files]
     
     # read into pandas - do in parallel for speed
-    retLst = Parallel(n_jobs=multiprocessing.cpu_count())
+    retLst = Parallel(n_jobs=multiprocessing.cpu_count()-2)
     retLst = retLst(delayed(pd.read_parquet)(path) for path in tqdm(files))
     
     # concatenate and save full file
+    print('Concatenating chunks')
     (pd.concat(retLst)
      .reset_index(drop=True)
      .to_parquet(PROCESSED_DATA_PATH / 'train_validation.parquet'))
-    
+  
 # dask attempt
 
 

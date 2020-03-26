@@ -100,7 +100,7 @@ def show_cv_days(cv, X, dt_col, day_col):
             },
             index=["train", "test"])
 
-        display(df)
+        # display(df)
 
 def plot_cv_indices(cv, X, dt_col, lw=10):
     n_splits = cv.get_n_splits()

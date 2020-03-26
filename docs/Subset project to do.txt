@@ -1,0 +1,19 @@
+The goal is to complete an end to end project using all 3 of sklearn, dask, and RapidsAI, I can then move on to a new project using what I have learnt.
+
+1. load data
+2. process data
+3. split into training and validation sets
+4. grid search a selection of models and compare
+
+5. get feature importances and tune model
+
+6. Build XGBoost, LightGBM, CatBoost
+7. select the best model and train on full data, then predict
+8. save the model with meta data
+
+Repeat using Dask
+Repeat using GPU
+Repeat using GPU and Dask
+
+Return to the full problem
+Rebuild to use Dask and GPU
